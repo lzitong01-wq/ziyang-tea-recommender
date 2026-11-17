@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紫阳富硒茶 · 个性化推荐结果</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="page-container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fa fa-leaf" aria-hidden="true"></i> 紫阳富硒茶推荐
+                </h1>
+                <a href="index.html" class="back-btn">
+                    <i class="fa fa-arrow-left" aria-hidden="true"></i> 返回重新填写
+                </a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- 偏好摘要：让用户看到自己填写的全部信息，包括备注 -->
+            <section class="preference-summary" id="preferenceSummary"></section>
+
+            <!-- 核心推荐 -->
+            <section class="recommend-module">
+                <div class="module-header">
+                    <h2 class="module-title">核心推荐 <span class="subtitle">（匹配度最高的 3 款）</span></h2>
+                    <div class="divider"></div>
+                </div>
+                <div class="recommend-list horizontal-layout" id="mainRecommendList"></div>
+            </section>
+
+            <!-- 其余茶品 -->
+            <section class="recommend-module">
+                <div class="module-header">
+                    <h2 class="module-title">更多茶品 <span class="subtitle">（其余 8 款，按匹配度排序）</span></h2>
+                    <div class="divider"></div>
+                </div>
+                <div class="recommend-list horizontal-layout" id="allCategoryList"></div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <p>© 2025 紫阳富硒茶推荐平台 | 绿茶：紫阳毛尖·银针/翠峰/硒香茶；调味茶：金橘茶/和平康吉茶/陈皮白茶/桂花白茶/桂花红茶</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 茶叶数据库：imgName 为主图，extraImgs 为补充图数组（均为本文件夹真实存在的文件）
+        const teaDatabase = {
+            "绿茶类": [
+                {
+                    "名称": "紫阳毛尖·银针",
+                    "简介": "选用紫阳高山茶园一芽一叶初展鲜叶，以紫阳毛尖传统工艺精制，芽头肥壮挺直、白毫密披，色泽银绿相间。冲泡后汤色清澈明亮，栗香清雅持久，滋味清甜鲜爽，硒含量高于普通绿茶，适合精致品饮与送礼。",
+                    "口味": "清甜,鲜爽",
+                    "功效": "补硒,养颜,清热",
+                    "冲泡": "75-80℃水温，1.5-2分钟，需控制水温",
+                    "适用场景": "送礼,精致品饮,夏季饮用",
+                    "复杂度": "中",
+                    "年龄适配": "18-25,26-40",
+                    "imgName": "紫阳毛尖·银针.jpg",
+                    "extraImgs": ["22.jpg"],
+                    "tag": "精品款"
+                },
+                {
+                    "名称": "紫阳毛尖·翠峰",
+                    "简介": "融合紫阳毛尖鲜爽与翠峰醇厚，选用一芽二叶鲜叶经改良工艺制成，条索紧结略曲、色泽翠绿油润。冲泡后汤色翠绿明亮，香气兼具栗香与高香，滋味鲜醇回甘，耐冲泡，适合家庭日常饮用与待客。",
+                    "口味": "鲜醇,醇厚",
+                    "功效": "补硒,提神,养胃（温和）",
+                    "冲泡": "80℃水温，2.5分钟，易冲泡",
+                    "适用场景": "家庭饮用,日常待客,新手入门",
+                    "复杂度": "低",
+                    "年龄适配": "26-40,41-60,60+",
+                    "imgName": "紫阳毛尖·翠峰.jpg",
+                    "extraImgs": ["2fa3a2604b75809a64f6bdd5547e9b8.jpg"],
+                    "tag": "大众款"
+                },
+                {
+                    "名称": "紫阳毛尖·硒香茶",
+                    "简介": "以紫阳毛尖工艺为核心，结合创新半烘炒技术，选用高山群体种鲜叶，条索细紧显毫、色泽绿润。冲泡后汤色青翠透亮，板栗香高爽，滋味浓醇鲜爽，硒元素保留率高，适合办公提神与日常品饮。",
+                    "口味": "鲜爽,浓醇",
+                    "功效": "高效补硒,明目,提神",
+                    "冲泡": "85℃水温，2.5分钟，易冲泡",
+                    "适用场景": "办公提神,日常品饮,所有经验",
+                    "复杂度": "低",
+                    "年龄适配": "18-25,26-40",
+                    "imgName": "紫阳毛尖·硒香茶.jpg",
+                    "extraImgs": ["2f6316010316b5c2fc2e49e1e5e4318.jpg"],
+                    "tag": "高香款"
+                }
+            ],
+            "红茶类": [
+                {
+                    "名称": "紫阳富硒红茶",
+                    "简介": "紫阳县全发酵红茶代表作，选用一芽二叶鲜叶，条索紧结、乌润显毫，汤色红亮，甜香、蜜香层次丰富，滋味醇厚甜润，富含硒元素，暖胃效果显著，适合秋冬饮用及体质偏寒人群。",
+                    "口味": "醇厚,甜润",
+                    "功效": "补硒,暖胃,驱寒",
+                    "冲泡": "90-95℃水温，3-4分钟，易冲泡",
+                    "适用场景": "秋冬保暖,日常饮用,所有经验",
+                    "复杂度": "低",
+                    "年龄适配": "41-60,60+",
+                    "imgName": "紫阳富硒红茶.jpg",
+                    "extraImgs": [],
+                    "tag": "暖胃款"
+                }
+            ],
+            "白茶类": [
+                {
+                    "名称": "紫阳富硒白茶",
+                    "简介": "以紫阳富硒茶鲜叶为原料，经萎凋、干燥制成，芽毫完整、满身披毫，汤色黄绿明亮，滋味清淡回甘。保留多种营养成分，富含硒元素，抗氧化、增强免疫力，适合体质偏热及养生人群。",
+                    "口味": "清淡,回甘",
+                    "功效": "补硒,抗氧化,增强免疫力",
+                    "冲泡": "85-90℃水温，3-5分钟，易冲泡",
+                    "适用场景": "夏季饮用,养生保健,所有经验",
+                    "复杂度": "低",
+                    "年龄适配": "41-60,60+",
+                    "imgName": "紫阳富硒白茶.jpg",
+                    "extraImgs": ["5e71954dd0f5a3f2dc4f191dc1c83b4.jpg"],
+                    "tag": "养生款"
+                }
+            ],
+            "茯茶（黑茶）类": [
+                {
+                    "名称": "紫阳富硒茯茶",
+                    "简介": "紫阳县特色黑茶，砖形紧实、黑褐油润，金花茂盛。冲泡后菌香浓郁，汤色橙红明亮，滋味醇厚回甘，富含硒元素与有益微生物，降脂养胃，适合饭后饮用及长期存放。",
+                    "口味": "醇厚,菌香",
+                    "功效": "补硒,降脂,养胃,解腻",
+                    "冲泡": "95-100℃水温，5分钟（可煮），可煮泡",
+                    "适用场景": "饭后解腻,秋冬保暖,资深经验",
+                    "复杂度": "高",
+                    "年龄适配": "41-60,60+",
+                    "imgName": "紫阳富硒茯茶.jpg",
+                    "extraImgs": [],
+                    "tag": "降脂款"
+                }
+            ],
+            "调味茶类": [
+                {
+                    "名称": "紫阳金橘茶",
+                    "简介": "以紫阳富硒红茶为基底，搭配紫阳本地金钱橘橘皮，经自然烘晒、窨制工艺制成，果香与茶香深度融合。冲泡后汤色橙黄明亮，入口兼具红茶醇厚与金橘清甜，果香经久不散，富含硒元素与维生素，适合女性及休闲饮用。",
+                    "口味": "果香,清甜",
+                    "功效": "补硒,理气,补充维生素",
+                    "冲泡": "85℃水温，3分钟，易冲泡",
+                    "适用场景": "休闲品饮,女性饮用,日常搭配",
+                    "复杂度": "低",
+                    "年龄适配": "18-25,26-40",
+                    "imgName": "紫阳金橘茶.jpg",
+                    "extraImgs": [],
+                    "tag": "金橘果香"
+                },
+                {
+                    "名称": "紫阳和平康吉茶",
+                    "简介": "紫阳县首款“食药同源”调味茶，以紫阳红茶为基底，添加本地金钱橘皮与生姜，经加料调味工艺制成。口感温和带自然姜香，无辛辣感，兼具红茶醇厚与生姜驱寒效果，富含硒元素，适合秋冬保健及风寒预防。",
+                    "口味": "姜香,温和",
+                    "功效": "补硒,驱寒,保健",
+                    "冲泡": "85-90℃水温，3-4分钟，易冲泡",
+                    "适用场景": "秋冬保健,风寒预防,中老年饮用",
+                    "复杂度": "低",
+                    "年龄适配": "41-60,60+",
+                    "imgName": "紫阳和平康吉茶.jpg",
+                    "extraImgs": [],
+                    "tag": "姜橘保健"
+                },
+                {
+                    "名称": "紫阳陈皮白茶",
+                    "简介": "以紫阳富硒白茶为基底，搭配三年陈化陈皮，经轻窨工艺制成，保留白茶清淡与陈皮陈香。冲泡后汤色浅黄明亮，滋味清甜回甘带陈皮果香，富含硒元素与陈皮苷，具有理气化痰、清热润肺功效，适合夏季及养生人群。",
+                    "口味": "清淡,陈皮香",
+                    "功效": "补硒,理气化痰,清热润肺",
+                    "冲泡": "85℃水温，3-4分钟，易冲泡",
+                    "适用场景": "夏季清热,养生保健,日常品饮",
+                    "复杂度": "低",
+                    "年龄适配": "26-40,41-60",
+                    "imgName": "紫阳陈皮白茶.jpg",
+                    "extraImgs": [
+                        "3a5e402e4a55ab3197d6c63cca488f7.jpg",
+                        "867d1208535b36a66cccc7957ac22eb.jpg",
+                        "c032bb4c6c97396cd370374fe7f97e2.jpg",
+                        "f6ad2ed750c400efbcb3cb929f4f41f.jpg"
+                    ],
+                    "tag": "陈皮养生"
+                },
+                {
+                    "名称": "紫阳桂花白茶",
+                    "简介": "以紫阳富硒白茶为基底，添加新鲜桂花花瓣，经低温窨制工艺制成，外形银白带黄，桂花香气清雅持久。冲泡后汤色黄绿明亮，滋味清甜鲜爽带桂花香，富含硒元素与桂花黄酮，具有舒缓情绪、美容养颜效果，适合下午茶及女性饮用。",
+                    "口味": "花香,清甜",
+                    "功效": "补硒,舒缓情绪,美容养颜",
+                    "冲泡": "80℃水温，2.5分钟，易冲泡",
+                    "适用场景": "下午茶,休闲放松,女性饮用",
+                    "复杂度": "低",
+                    "年龄适配": "18-25,26-40",
+                    "imgName": "紫阳桂花白茶.jpg",
+                    "extraImgs": [],
+                    "tag": "桂花清香"
+                },
+                {
+                    "名称": "紫阳桂花红茶",
+                    "简介": "以紫阳富硒红茶为基底，搭配重瓣桂花，经多次窨制工艺制成，红茶醇厚与桂花甜香完美融合。冲泡后汤色橙红明亮，香气浓郁带桂花甜香，滋味醇厚甘爽，富含硒元素与维生素，适合秋冬保暖及日常休闲饮用。",
+                    "口味": "花香,醇厚",
+                    "功效": "补硒,暖胃,舒缓情绪",
+                    "冲泡": "90℃水温，3分钟，易冲泡",
+                    "适用场景": "秋冬保暖,休闲品饮,待客使用",
+                    "复杂度": "低",
+                    "年龄适配": "26-40,41-60",
+                    "imgName": "紫阳桂花红茶.jpg",
+                    "extraImgs": [],
+                    "tag": "桂花醇厚"
+                }
+            ]
+        };
+
+        // 读取用户在 index.html 填写的信息；数据损坏时优雅降级，不让整页脚本崩溃
+        let userInfo = null;
+        try {
+            userInfo = JSON.parse(localStorage.getItem('teaUserInfo'));
+        } catch (e) {
+            userInfo = null;
+        }
+        if (!userInfo || !userInfo.health || !Array.isArray(userInfo.health) || userInfo.health.length === 0) {
+            alert('未检测到有效的填写信息，请先返回首页！');
+            window.location.replace('index.html');
+            throw new Error('invalid userInfo, redirecting');
+        }
+        // 字段兜底：兼容旧版本或手工改动过的存储数据，避免 undefined 参与计算
+        userInfo.age = typeof userInfo.age === 'string' ? userInfo.age : '';
+        userInfo.taste = typeof userInfo.taste === 'string' ? userInfo.taste : '';
+        userInfo.constitution = typeof userInfo.constitution === 'string' ? userInfo.constitution : '中性';
+        userInfo.health = userInfo.health.filter(h => typeof h === 'string');
+        userInfo.scene = typeof userInfo.scene === 'string' ? userInfo.scene : '';
+        userInfo.brew = typeof userInfo.brew === 'string' ? userInfo.brew : '无限制';
+        userInfo.experience = typeof userInfo.experience === 'string' ? userInfo.experience : '普通';
+        userInfo.note = typeof userInfo.note === 'string' ? userInfo.note : '';
+
+        // HTML 转义：用户填写的内容一律转义后再插入 innerHTML，防止 XSS
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[c]);
+        }
+
+        // 同义词表：让表单选项与茶品文案里的不同说法能够匹配
+        const effectSynonyms = {
+            '补硒': ['补硒'],
+            '暖胃': ['暖胃', '养胃'],
+            '清热': ['清热'],
+            '提神': ['提神'],
+            '理气': ['理气']
+        };
+        const sceneSynonyms = {
+            '日常饮用': ['日常饮用', '家庭饮用', '日常待客', '日常品饮', '日常搭配'],
+            '办公提神': ['办公提神'],
+            '休闲品饮': ['休闲品饮', '休闲放松', '下午茶'],
+            '饭后解腻': ['饭后解腻', '解腻'],
+            '送礼': ['送礼', '待客']
+        };
+
+        function hasEffect(tea, need) {
+            return (effectSynonyms[need] || [need]).some(s => tea.功效.includes(s));
+        }
+
+        function matchScene(tea, scene) {
+            return (sceneSynonyms[scene] || [scene]).some(s => tea.适用场景.includes(s));
+        }
+
+        // 打分：满分 100 = 年龄15 + 口味25 + 健康20 + 体质5 + 场景12 + 冲泡8 + 经验15
+        function calculateScore(tea) {
+            let score = 0;
+            score += tea.年龄适配.split(',').includes(userInfo.age) ? 15 : 7;
+
+            const tasteHit = tea.口味.split(',').some(t =>
+                t === userInfo.taste || t.includes(userInfo.taste) || userInfo.taste.includes(t));
+            score += tasteHit ? 25 : 10;
+
+            const matchedHealth = userInfo.health.filter(h => hasEffect(tea, h));
+            score += (matchedHealth.length / userInfo.health.length) * 20;
+
+            if (userInfo.constitution === '中性') score += 5;
+            else if (userInfo.constitution === '偏寒' && hasEffect(tea, '暖胃')) score += 5;
+            else if (userInfo.constitution === '偏热' && hasEffect(tea, '清热')) score += 5;
+
+            score += matchScene(tea, userInfo.scene) ? 12 : 6;
+
+            if (userInfo.brew === '简单快速') score += tea.冲泡.includes('易冲泡') ? 8 : 4;
+            else if (userInfo.brew === '可煮泡') score += tea.冲泡.includes('可煮') ? 8 : 4;
+            else score += 8;
+
+            const expOk = (userInfo.experience === '新手' && tea.复杂度 === '低') ||
+                          (userInfo.experience === '普通' && ['低', '中'].includes(tea.复杂度)) ||
+                          userInfo.experience === '资深';
+            score += expOk ? 15 : 10;
+
+            return {
+                score: Math.round(score),
+                tasteHit,
+                matchedHealth
+            };
+        }
+
+        // 为每款茶计算得分，并保留匹配细节供推荐理由使用
+        let allTeas = [];
+        for (const [bigCat, teas] of Object.entries(teaDatabase)) {
+            teas.forEach(tea => {
+                const m = calculateScore(tea);
+                allTeas.push({ ...tea, 大类: bigCat, 匹配分: m.score, tasteHit: m.tasteHit, matchedHealth: m.matchedHealth });
+            });
+        }
+        allTeas.sort((a, b) => b.匹配分 - a.匹配分);
+        const mainRecommend = allTeas.slice(0, 3);
+        const restRecommend = allTeas.slice(3);
+
+        // 生成纯本地 SVG 占位图，避免图片缺失时出现破图，也不依赖外部网络
+        function placeholder(text, w, h) {
+            const safe = String(text).replace(/[<>&"']/g, '');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#f0f0f0"/><text x="50%" y="50%" font-size="15" fill="#888" text-anchor="middle" dominant-baseline="middle">${safe}</text></svg>`;
+            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        }
+
+        function makeImage(src, alt, w, h) {
+            const img = document.createElement('img');
+            img.className = w > h ? 'tea-extra-img' : 'tea-img';
+            img.alt = alt;
+            img.src = src;
+            img.addEventListener('error', function () {
+                this.src = placeholder(alt, w, h);
+            });
+            return img;
+        }
+
+        // 渲染偏好摘要
+        function renderSummary() {
+            const healthText = escapeHtml(userInfo.health.join('、'));
+            const noteText = userInfo.note ? escapeHtml(userInfo.note) : '未填写';
+            document.getElementById('preferenceSummary').innerHTML = `
+                <div class="summary-title"><i class="fa fa-user-circle" aria-hidden="true"></i> 您的偏好摘要</div>
+                <div class="summary-grid">
+                    <span>年龄：${escapeHtml(userInfo.age)}岁</span>
+                    <span>口味：${escapeHtml(userInfo.taste)}</span>
+                    <span>体质：${escapeHtml(userInfo.constitution)}</span>
+                    <span>健康需求：${healthText}</span>
+                    <span>饮茶场景：${escapeHtml(userInfo.scene)}</span>
+                    <span>冲泡偏好：${escapeHtml(userInfo.brew)}</span>
+                    <span>饮茶经验：${escapeHtml(userInfo.experience)}</span>
+                </div>
+                <div class="summary-note"><i class="fa fa-comment-o" aria-hidden="true"></i> 备注：${noteText}</div>
+            `;
+        }
+
+        // 生成推荐理由：只陈述真正匹配到的项
+        function buildReasons(tea) {
+            const reasons = [];
+            if (tea.年龄适配.includes(userInfo.age)) reasons.push(`适合${escapeHtml(userInfo.age)}岁年龄段`);
+            if (tea.tasteHit) reasons.push(`口味「${escapeHtml(userInfo.taste)}」契合`);
+            else reasons.push(`口味偏${tea.口味.split(',')[0]}，可作为新尝试`);
+            if (tea.matchedHealth.length) reasons.push(`满足「${tea.matchedHealth.join('、')}」需求`);
+            if (matchScene(tea, userInfo.scene)) reasons.push(`适合${escapeHtml(userInfo.scene)}场景`);
+            if (userInfo.brew === '简单快速' && tea.冲泡.includes('易冲泡')) reasons.push('冲泡简单（3分钟内）');
+            if (userInfo.brew === '可煮泡' && tea.冲泡.includes('可煮')) reasons.push('支持煮泡');
+            if (userInfo.constitution === '偏寒' && hasEffect(tea, '暖胃')) reasons.push('温和暖胃，适合偏寒体质');
+            if (userInfo.constitution === '偏热' && hasEffect(tea, '清热')) reasons.push('清热降火，适合偏热体质');
+            return reasons.join('；');
+        }
+
+        // 渲染推荐卡片
+        function renderList(list, containerId, rankOffset) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            list.forEach((tea, i) => {
+                const rank = i + rankOffset;
+                const card = document.createElement('div');
+                card.className = 'tea-card';
+
+                const info = document.createElement('div');
+                info.className = 'tea-content';
+                const text = document.createElement('div');
+                text.className = 'tea-info';
+                text.innerHTML = `
+                    <h3 class="tea-name">${tea.大类} - ${tea.名称}</h3>
+                    <div class="tea-score"><i class="fa fa-star" aria-hidden="true"></i> 匹配度：${tea.匹配分}分（满分100）</div>
+                    <div class="tea-reason"><span class="reason-label"><i class="fa fa-check-circle" aria-hidden="true"></i> 推荐理由：</span>${buildReasons(tea)}</div>
+                    <div class="tea-intro"><span class="intro-label"><i class="fa fa-info-circle" aria-hidden="true"></i> 简介：</span>${tea.简介}</div>
+                    <div class="tea-detail">
+                        <div class="detail-item"><i class="fa fa-tint" aria-hidden="true"></i> <span class="detail-label">冲泡：</span>${tea.冲泡}</div>
+                        <div class="detail-item"><i class="fa fa-user" aria-hidden="true"></i> <span class="detail-label">适合经验：</span>${tea.复杂度 === '低' ? '新手/普通/资深' : tea.复杂度 === '中' ? '普通/资深' : '资深'}</div>
+                    </div>
+                `;
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'tea-img-container';
+                imgWrap.appendChild(makeImage(tea.imgName, tea.名称 + '主图', 280, 220));
+                info.appendChild(text);
+                info.appendChild(imgWrap);
+                card.appendChild(info);
+
+                if (tea.extraImgs && tea.extraImgs.length) {
+                    const extraWrap = document.createElement('div');
+                    extraWrap.className = 'tea-extra-img-container';
+                    const title = document.createElement('p');
+                    title.className = 'extra-img-title';
+                    title.innerHTML = '<i class="fa fa-picture-o" aria-hidden="true"></i> 补充展示';
+                    extraWrap.appendChild(title);
+                    const gallery = document.createElement('div');
+                    gallery.className = 'extra-gallery';
+                    tea.extraImgs.forEach((src, idx) => {
+                        gallery.appendChild(makeImage(src, tea.名称 + '补充图' + (idx + 1), 800, 300));
+                    });
+                    extraWrap.appendChild(gallery);
+                    card.appendChild(extraWrap);
+                }
+
+                const rankEl = document.createElement('div');
+                rankEl.className = 'tea-rank' + (rank <= 3 ? ' rank-' + rank : '');
+                rankEl.textContent = rank;
+                card.appendChild(rankEl);
+
+                const tagEl = document.createElement('div');
+                tagEl.className = 'tea-tag';
+                tagEl.textContent = tea.tag;
+                card.appendChild(tagEl);
+
+                container.appendChild(card);
+            });
+        }
+
+        renderSummary();
+        renderList(mainRecommend, 'mainRecommendList', 1);
+        renderList(restRecommend, 'allCategoryList', 4);
+    </script>
+</body>
+</html>

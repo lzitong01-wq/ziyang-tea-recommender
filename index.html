@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紫阳富硒茶 · 个性化推荐表单</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <header class="form-header">
+            <h1><i class="fa fa-leaf" aria-hidden="true"></i> 紫阳富硒茶个性化推荐</h1>
+        </header>
+
+        <!-- 主体布局：左侧步骤导航 + 右侧表单区域 -->
+        <div class="form-layout">
+            <!-- 左侧垂直步骤导航 -->
+            <nav class="step-nav">
+                <ul class="step-list">
+                    <li class="step-item active" data-step="1">
+                        <span class="step-number">1</span>
+                        <span class="step-text">基础偏好</span>
+                    </li>
+                    <li class="step-item" data-step="2">
+                        <span class="step-number">2</span>
+                        <span class="step-text">健康需求</span>
+                    </li>
+                    <li class="step-item" data-step="3">
+                        <span class="step-number">3</span>
+                        <span class="step-text">场景与冲泡</span>
+                    </li>
+                    <li class="step-item" data-step="4">
+                        <span class="step-number">4</span>
+                        <span class="step-text">饮茶经验</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- 右侧表单区域 -->
+            <main class="form-content">
+                <form id="teaForm">
+                    <!-- 步骤1：基础偏好 -->
+                    <div class="form-step active" id="formStep1">
+                        <h2 class="step-title">基础偏好</h2>
+                        <div class="form-group">
+                            <label for="age"><i class="fa fa-user-o" aria-hidden="true"></i> 年龄范围（必填）</label>
+                            <select id="age" required>
+                                <option value="">请选择您的年龄范围</option>
+                                <option value="18-25">18-25岁（偏好清新、花香）</option>
+                                <option value="26-40">26-40岁（兼顾口感与养生）</option>
+                                <option value="41-60">41-60岁（注重养生保健）</option>
+                                <option value="60+">60岁以上（偏好温和暖胃）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taste"><i class="fa fa-tint" aria-hidden="true"></i> 口味偏好（必填）</label>
+                            <select id="taste" required>
+                                <option value="">请选择您喜欢的口味</option>
+                                <option value="鲜爽">鲜爽（如毛尖·银针）</option>
+                                <option value="醇厚">醇厚（如富硒红茶）</option>
+                                <option value="清甜">清甜（如桂花白茶）</option>
+                                <option value="果香">果香（如金橘茶）</option>
+                                <option value="花香">花香（如桂花红茶）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="constitution"><i class="fa fa-heart-o" aria-hidden="true"></i> 体质类型（必填）</label>
+                            <select id="constitution" required>
+                                <option value="">请选择您的体质</option>
+                                <option value="偏寒">偏寒（适合暖胃茶）</option>
+                                <option value="偏热">偏热（适合清热茶）</option>
+                                <option value="中性">中性（所有品类适配）</option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="next-btn" onclick="nextStep(1)">下一步 <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- 步骤2：健康需求 -->
+                    <div class="form-step hidden" id="formStep2">
+                        <h2 class="step-title">健康需求</h2>
+                        <div class="form-group">
+                            <label><i class="fa fa-medkit" aria-hidden="true"></i> 健康需求（可多选，至少1项）</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="health" value="补硒"> 补硒（所有紫阳富硒茶均含）</label>
+                                <label><input type="checkbox" name="health" value="暖胃"> 暖胃（富硒红茶、和平康吉茶）</label>
+                                <label><input type="checkbox" name="health" value="清热"> 清热（毛尖·银针、陈皮白茶）</label>
+                                <label><input type="checkbox" name="health" value="提神"> 提神（毛尖·硒香茶）</label>
+                                <label><input type="checkbox" name="health" value="理气"> 理气（金橘茶、陈皮白茶）</label>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="prev-btn" onclick="prevStep(2)"> <i class="fa fa-arrow-left" aria-hidden="true"></i> 上一步</button>
+                            <button type="button" class="next-btn" onclick="nextStep(2)">下一步 <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- 步骤3：场景与冲泡 -->
+                    <div class="form-step hidden" id="formStep3">
+                        <h2 class="step-title">场景与冲泡</h2>
+                        <div class="form-group">
+                            <label for="scene"><i class="fa fa-calendar-o" aria-hidden="true"></i> 主要饮茶场景（必填）</label>
+                            <select id="scene" required>
+                                <option value="">请选择您的主要饮茶场景</option>
+                                <option value="日常饮用">日常饮用</option>
+                                <option value="办公提神">办公提神</option>
+                                <option value="休闲品饮">休闲品饮</option>
+                                <option value="饭后解腻">饭后解腻</option>
+                                <option value="送礼">送礼</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="brew"><i class="fa fa-fire" aria-hidden="true"></i> 冲泡偏好（必填）</label>
+                            <select id="brew" required>
+                                <option value="">请选择您的冲泡习惯</option>
+                                <option value="简单快速">简单快速（易冲泡）</option>
+                                <option value="可煮泡">可煮泡（如富硒茯茶）</option>
+                                <option value="无限制">无限制</option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="prev-btn" onclick="prevStep(3)"> <i class="fa fa-arrow-left" aria-hidden="true"></i> 上一步</button>
+                            <button type="button" class="next-btn" onclick="nextStep(3)">下一步 <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- 步骤4：饮茶经验 -->
+                    <div class="form-step hidden" id="formStep4">
+                        <h2 class="step-title">饮茶经验</h2>
+                        <div class="form-group">
+                            <label for="experience"><i class="fa fa-star-o" aria-hidden="true"></i> 饮茶经验（必填）</label>
+                            <select id="experience" required>
+                                <option value="">请选择您的饮茶经验</option>
+                                <option value="新手">新手（适合低复杂度茶品）</option>
+                                <option value="普通">普通（适合多数茶品）</option>
+                                <option value="资深">资深（适合全品类）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="note"><i class="fa fa-comment-o" aria-hidden="true"></i> 其他备注（选填）</label>
+                            <textarea id="note" rows="3" maxlength="200" placeholder="如有其他偏好，可在此备注（最多200字）"></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="prev-btn" onclick="prevStep(4)"> <i class="fa fa-arrow-left" aria-hidden="true"></i> 上一步</button>
+                            <button type="submit" id="submitBtn">提交并查看推荐 <i class="fa fa-check" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // 步骤切换逻辑
+        function nextStep(currentStep) {
+            // 验证当前步骤必填项
+            if (currentStep === 1) {
+                const age = document.getElementById('age').value;
+                const taste = document.getElementById('taste').value;
+                const constitution = document.getElementById('constitution').value;
+                if (!age || !taste || !constitution) {
+                    alert('请填写步骤1中的所有必填项！');
+                    return;
+                }
+            } else if (currentStep === 2) {
+                const healthChecks = document.querySelectorAll('input[name="health"]:checked');
+                if (healthChecks.length === 0) {
+                    alert('请至少选择1项健康需求！');
+                    return;
+                }
+            } else if (currentStep === 3) {
+                const scene = document.getElementById('scene').value;
+                const brew = document.getElementById('brew').value;
+                if (!scene || !brew) {
+                    alert('请填写步骤3中的所有必填项！');
+                    return;
+                }
+            }
+
+            // 切换步骤显示
+            document.getElementById(`formStep${currentStep}`).classList.add('hidden');
+            document.getElementById(`formStep${currentStep}`).classList.remove('active');
+            document.getElementById(`formStep${currentStep + 1}`).classList.remove('hidden');
+            document.getElementById(`formStep${currentStep + 1}`).classList.add('active');
+            
+            // 更新左侧步骤导航状态
+            document.querySelector(`.step-item[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step-item[data-step="${currentStep + 1}"]`).classList.add('active');
+        }
+
+        function prevStep(currentStep) {
+            // 切换步骤显示
+            document.getElementById(`formStep${currentStep}`).classList.add('hidden');
+            document.getElementById(`formStep${currentStep}`).classList.remove('active');
+            document.getElementById(`formStep${currentStep - 1}`).classList.remove('hidden');
+            document.getElementById(`formStep${currentStep - 1}`).classList.add('active');
+            
+            // 更新左侧步骤导航状态
+            document.querySelector(`.step-item[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step-item[data-step="${currentStep - 1}"]`).classList.add('active');
+        }
+
+        // 表单提交逻辑
+        document.getElementById('teaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // 二次校验：防止跳过前面步骤的校验直接提交空值
+            const experience = document.getElementById('experience').value;
+            const healthCount = document.querySelectorAll('input[name="health"]:checked').length;
+            if (!experience) {
+                alert('请选择您的饮茶经验！');
+                return;
+            }
+            if (healthCount === 0) {
+                alert('请至少选择1项健康需求！');
+                return;
+            }
+            const userInfo = {
+                age: document.getElementById('age').value,
+                taste: document.getElementById('taste').value,
+                constitution: document.getElementById('constitution').value,
+                health: Array.from(document.querySelectorAll('input[name="health"]:checked')).map(cb => cb.value),
+                scene: document.getElementById('scene').value,
+                brew: document.getElementById('brew').value,
+                experience: experience,
+                note: document.getElementById('note').value
+            };
+            localStorage.setItem('teaUserInfo', JSON.stringify(userInfo));
+            window.location.href = 'result.html';
+        });
+    </script>
+</body>
+</html>

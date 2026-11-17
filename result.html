@@ -257,6 +257,14 @@
             '饭后解腻': ['饭后解腻', '解腻'],
             '送礼': ['送礼', '待客']
         };
+        // 口味近似表：用于三档匹配中的"接近"档（精确命中优先）
+        const tasteSynonyms = {
+            '鲜爽': ['鲜爽', '鲜醇', '浓醇'],
+            '醇厚': ['醇厚', '鲜醇', '浓醇', '甜润'],
+            '清甜': ['清甜', '清淡', '回甘', '甜润'],
+            '果香': ['果香', '陈皮香'],
+            '花香': ['花香']
+        };
 
         function hasEffect(tea, need) {
             return (effectSynonyms[need] || [need]).some(s => tea.功效.includes(s));
@@ -266,37 +274,62 @@
             return (sceneSynonyms[scene] || [scene]).some(s => tea.适用场景.includes(s));
         }
 
-        // 打分：满分 100 = 年龄15 + 口味25 + 健康20 + 体质5 + 场景12 + 冲泡8 + 经验15
+        // 打分：满分 100 = 口味25 + 健康20 + 场景15 + 体质10 + 冲泡10 + 年龄10 + 经验10
         function calculateScore(tea) {
             let score = 0;
-            score += tea.年龄适配.split(',').includes(userInfo.age) ? 15 : 7;
 
-            const tasteHit = tea.口味.split(',').some(t =>
-                t === userInfo.taste || t.includes(userInfo.taste) || userInfo.taste.includes(t));
-            score += tasteHit ? 25 : 10;
+            // 1. 口味（25/15/5 三档）：精确 > 近似 > 不匹配
+            const tasteTags = tea.口味.split(',');
+            let tasteLevel = 'none';
+            if (tasteTags.includes(userInfo.taste)) tasteLevel = 'exact';
+            else if ((tasteSynonyms[userInfo.taste] || []).some(s => tasteTags.includes(s))) tasteLevel = 'near';
+            score += tasteLevel === 'exact' ? 25 : (tasteLevel === 'near' ? 15 : 5);
 
+            // 2. 健康需求（按比例，满分20）
             const matchedHealth = userInfo.health.filter(h => hasEffect(tea, h));
             score += (matchedHealth.length / userInfo.health.length) * 20;
 
-            if (userInfo.constitution === '中性') score += 5;
-            else if (userInfo.constitution === '偏寒' && hasEffect(tea, '暖胃')) score += 5;
-            else if (userInfo.constitution === '偏热' && hasEffect(tea, '清热')) score += 5;
+            // 3. 场景（15/7）
+            const sceneHit = matchScene(tea, userInfo.scene);
+            score += sceneHit ? 15 : 7;
 
-            score += matchScene(tea, userInfo.scene) ? 12 : 6;
+            // 4. 体质（满分10）：寒热硬约束，逆性茶的分数被明显压低
+            let constitutionScore = 0;
+            let constitutionNote = '';
+            if (userInfo.constitution === '中性') {
+                constitutionScore = 10;
+            } else if (userInfo.constitution === '偏寒') {
+                if (hasEffect(tea, '暖胃')) { constitutionScore = 10; constitutionNote = '温和暖胃，适合偏寒体质'; }
+                else if (hasEffect(tea, '清热')) { constitutionScore = 4; constitutionNote = '性偏清凉，偏寒体质需注意'; }
+                else { constitutionScore = 7; }
+            } else if (userInfo.constitution === '偏热') {
+                if (hasEffect(tea, '清热')) { constitutionScore = 10; constitutionNote = '清热降火，适合偏热体质'; }
+                else if (hasEffect(tea, '暖胃') || tea.功效.includes('驱寒')) { constitutionScore = 4; constitutionNote = '性偏温，偏热体质需注意'; }
+                else { constitutionScore = 7; }
+            }
+            score += constitutionScore;
 
-            if (userInfo.brew === '简单快速') score += tea.冲泡.includes('易冲泡') ? 8 : 4;
-            else if (userInfo.brew === '可煮泡') score += tea.冲泡.includes('可煮') ? 8 : 4;
-            else score += 8;
+            // 5. 冲泡（10/5）
+            if (userInfo.brew === '简单快速') score += tea.冲泡.includes('易冲泡') ? 10 : 5;
+            else if (userInfo.brew === '可煮泡') score += tea.冲泡.includes('可煮') ? 10 : 5;
+            else score += 10;
 
+            // 6. 年龄（10/5）
+            score += tea.年龄适配.split(',').includes(userInfo.age) ? 10 : 5;
+
+            // 7. 经验（10/5）
             const expOk = (userInfo.experience === '新手' && tea.复杂度 === '低') ||
                           (userInfo.experience === '普通' && ['低', '中'].includes(tea.复杂度)) ||
                           userInfo.experience === '资深';
-            score += expOk ? 15 : 10;
+            score += expOk ? 10 : 5;
 
             return {
                 score: Math.round(score),
-                tasteHit,
-                matchedHealth
+                tasteHit: tasteLevel !== 'none',
+                tasteLevel,
+                matchedHealth,
+                sceneHit,
+                constitutionNote
             };
         }
 
@@ -305,7 +338,7 @@
         for (const [bigCat, teas] of Object.entries(teaDatabase)) {
             teas.forEach(tea => {
                 const m = calculateScore(tea);
-                allTeas.push({ ...tea, 大类: bigCat, 匹配分: m.score, tasteHit: m.tasteHit, matchedHealth: m.matchedHealth });
+                allTeas.push({ ...tea, 大类: bigCat, 匹配分: m.score, tasteHit: m.tasteHit, tasteLevel: m.tasteLevel, matchedHealth: m.matchedHealth, sceneHit: m.sceneHit, constitutionNote: m.constitutionNote });
             });
         }
         allTeas.sort((a, b) => b.匹配分 - a.匹配分);
@@ -353,14 +386,14 @@
         function buildReasons(tea) {
             const reasons = [];
             if (tea.年龄适配.includes(userInfo.age)) reasons.push(`适合${escapeHtml(userInfo.age)}岁年龄段`);
-            if (tea.tasteHit) reasons.push(`口味「${escapeHtml(userInfo.taste)}」契合`);
+            if (tea.tasteLevel === 'exact') reasons.push(`口味「${escapeHtml(userInfo.taste)}」高度契合`);
+            else if (tea.tasteLevel === 'near') reasons.push(`口味接近您偏好的「${escapeHtml(userInfo.taste)}」`);
             else reasons.push(`口味偏${tea.口味.split(',')[0]}，可作为新尝试`);
             if (tea.matchedHealth.length) reasons.push(`满足「${tea.matchedHealth.join('、')}」需求`);
-            if (matchScene(tea, userInfo.scene)) reasons.push(`适合${escapeHtml(userInfo.scene)}场景`);
+            if (tea.sceneHit) reasons.push(`适合${escapeHtml(userInfo.scene)}场景`);
             if (userInfo.brew === '简单快速' && tea.冲泡.includes('易冲泡')) reasons.push('冲泡简单（3分钟内）');
             if (userInfo.brew === '可煮泡' && tea.冲泡.includes('可煮')) reasons.push('支持煮泡');
-            if (userInfo.constitution === '偏寒' && hasEffect(tea, '暖胃')) reasons.push('温和暖胃，适合偏寒体质');
-            if (userInfo.constitution === '偏热' && hasEffect(tea, '清热')) reasons.push('清热降火，适合偏热体质');
+            if (tea.constitutionNote) reasons.push(tea.constitutionNote);
             return reasons.join('；');
         }
 
